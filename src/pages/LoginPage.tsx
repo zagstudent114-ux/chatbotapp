@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Activity } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-interface LoginPageProps {
-  onToggleMode: () => void;
-}
-
-export function LoginPage({ onToggleMode }: LoginPageProps) {
+export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -106,12 +103,12 @@ export function LoginPage({ onToggleMode }: LoginPageProps) {
 
         <p className="text-center text-gray-600 mt-6">
           Don't have an account?{' '}
-          <button
-            onClick={onToggleMode}
+          <Link
+            to="/signup"
             className="text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
           >
             Sign up
-          </button>
+          </Link>
         </p>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { AdminChatViewer } from '../components/AdminChatViewer';
 import { AdminKnowledgeBasePanel } from '../components/AdminKnowledgeBasePanel';
 import { Users, MessageSquare, Database, Shield, LogOut, Home } from 'lucide-react';
 import { Database as DB } from '../lib/database.types';
+import { useNavigate } from 'react-router-dom';
 
 type Athlete = DB['public']['Tables']['athletes']['Row'];
 
@@ -12,6 +13,7 @@ export function AdminPage() {
   const { signOut, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'chats' | 'knowledge'>('users');
   const [selectedUser, setSelectedUser] = useState<Athlete | null>(null);
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
@@ -22,7 +24,7 @@ export function AdminPage() {
   };
 
   const handleBackToDashboard = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleSelectUser = (user: Athlete) => {
