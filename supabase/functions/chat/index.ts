@@ -196,7 +196,7 @@ Deno.serve(async (req: Request) => {
           },
         ],
         temperature: queryType.isQuick ? 0.3 : 0.7,
-        max_tokens: queryType.isQuick ? 200 : 400,
+        max_tokens: queryType.isQuick ? 600 : 800,
       }),
     });
 
