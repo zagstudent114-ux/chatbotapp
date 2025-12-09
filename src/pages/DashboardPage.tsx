@@ -60,19 +60,6 @@ export function DashboardPage() {
           >
             Chat
           </NavLink>
-          <NavLink
-            to="/knowledge"
-            className={({ isActive }) =>
-              `px-2 md:px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-1 md:gap-2 text-sm ${
-                isActive
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`
-            }
-          >
-            <Database className="w-4 h-4" />
-            <span>Knowledge</span>
-          </NavLink>
           {isAdmin && (
             <Link
               to="/admin"
@@ -118,13 +105,6 @@ export function DashboardPage() {
           >
             <BarChart3 className="w-5 h-5" />
             <span className="text-xs font-medium">Metrics</span>
-          </NavLink>
-          <NavLink
-            to="/knowledge"
-            className={mobileNavLinkClass}
-          >
-            <Database className="w-5 h-5" />
-            <span className="text-xs font-medium">Knowledge</span>
           </NavLink>
           <NavLink
             to="/tutorial"

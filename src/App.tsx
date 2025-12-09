@@ -54,7 +54,6 @@ function App() {
           }>
             <Route index element={<Navigate to="/chat" replace />} />
             <Route path="chat" element={<ChatPage />} />
-            <Route path="knowledge" element={<KnowledgeBasePanel />} />
             <Route path="tutorial" element={<TutorialPanel />} />
             <Route path="metrics" element={
                <div className="h-full bg-white">

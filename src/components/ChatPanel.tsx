@@ -16,6 +16,7 @@ export function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,19 +52,23 @@ export function ChatPanel() {
   const loadChatHistory = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('athlete_id', user.id)
-      .order('timestamp', { ascending: false })
-      .limit(50);
+    try {
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('athlete_id', user.id)
+        .order('timestamp', { ascending: false })
+        .limit(50);
 
-    if (error) {
-      console.error('Error loading chat history:', error);
-      return;
+      if (error) {
+        console.error('Error loading chat history:', error);
+        return;
+      }
+
+      setMessages((data || []).reverse());
+    } finally {
+      setHistoryLoading(false);
     }
-
-    setMessages((data || []).reverse());
   };
 
   const sendMessage = async () => {
@@ -164,7 +169,11 @@ export function ChatPanel() {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4"
       >
-        {messages.length === 0 ? (
+        {historyLoading ? (
+          <div className="h-full flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+          </div>
+        ) : messages.length === 0 ? (
           <div className="h-full flex items-center justify-center px-4">
             <div className="text-center max-w-md">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
