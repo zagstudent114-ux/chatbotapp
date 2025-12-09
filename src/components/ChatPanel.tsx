@@ -55,7 +55,7 @@ export function ChatPanel() {
       .from('chat_messages')
       .select('*')
       .eq('athlete_id', user.id)
-      .order('timestamp', { ascending: true })
+      .order('timestamp', { ascending: false })
       .limit(50);
 
     if (error) {
@@ -63,7 +63,7 @@ export function ChatPanel() {
       return;
     }
 
-    setMessages(data || []);
+    setMessages((data || []).reverse());
   };
 
   const sendMessage = async () => {
