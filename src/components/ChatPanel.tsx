@@ -1,32 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { useChat } from '../contexts/ChatContext';
 import { Send, Loader2 } from 'lucide-react';
 import { ChatMessage } from './ChatMessage';
 
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-}
-
 export function ChatPanel() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, loading, historyLoading, sendMessage } = useChat();
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [historyLoading, setHistoryLoading] = useState(true);
-  const [sessionId] = useState(() => crypto.randomUUID());
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef(0);
-
-  useEffect(() => {
-    loadChatHistory();
-  }, [user]);
 
   useEffect(() => {
     if (messages.length > prevMessagesLengthRef.current && shouldAutoScroll) {
@@ -49,108 +35,19 @@ export function ChatPanel() {
     setShouldAutoScroll(isAtBottom);
   };
 
-  const loadChatHistory = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('athlete_id', user.id)
-        .order('timestamp', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error('Error loading chat history:', error);
-        return;
-      }
-
-      setMessages((data || []).reverse());
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!input.trim() || !user || loading) return;
 
-    const userMessage = input.trim();
+    const message = input.trim();
     setInput('');
-    setLoading(true);
-
     setShouldAutoScroll(true);
-
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-
-    await supabase.from('chat_messages').insert({
-      athlete_id: user.id,
-      session_id: sessionId,
-      role: 'user',
-      content: userMessage,
-    });
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            message: userMessage,
-            athlete_id: user.id,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const data = await response.json();
-
-      const assistantMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-
-      await supabase.from('chat_messages').insert({
-        athlete_id: user.id,
-        session_id: sessionId,
-        role: 'assistant',
-        content: data.response,
-      });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setLoading(false);
-    }
+    await sendMessage(message);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSendMessage();
     }
   };
 
@@ -219,7 +116,7 @@ export function ChatPanel() {
             disabled={loading}
           />
           <button
-            onClick={sendMessage}
+            onClick={handleSendMessage}
             disabled={!input.trim() || loading}
             className="bg-emerald-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >

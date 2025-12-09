@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -37,31 +38,33 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          
-          <Route path="/admin" element={
-            <ProtectedRoute adminOnly>
-              <AdminPage />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="/chat" replace />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="tutorial" element={<TutorialPanel />} />
-            <Route path="metrics" element={
-               <div className="h-full bg-white">
-                 <MetricsPanel />
-               </div>
+        <ChatProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly>
+                <AdminPage />
+              </ProtectedRoute>
             } />
-          </Route>
-        </Routes>
+
+            <Route path="/" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Navigate to="/chat" replace />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="tutorial" element={<TutorialPanel />} />
+              <Route path="metrics" element={
+                 <div className="h-full bg-white">
+                   <MetricsPanel />
+                 </div>
+              } />
+            </Route>
+          </Routes>
+        </ChatProvider>
       </AuthProvider>
     </BrowserRouter>
   );
